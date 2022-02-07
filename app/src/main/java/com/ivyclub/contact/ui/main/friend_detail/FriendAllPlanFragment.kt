@@ -20,11 +20,13 @@ class FriendAllPlanFragment :
     private val args: FriendAllPlanFragmentArgs by navArgs()
 
     private val planListAdapter: PlanListAdapter by lazy {
-        PlanListAdapter {
-            findNavController().navigate(
-                FriendAllPlanFragmentDirections.actionFriendAllPlanFragmentToPlanDetailsFragment(it)
-            )
-        }
+        PlanListAdapter(
+            onItemClick = {
+                findNavController().navigate(
+                    FriendAllPlanFragmentDirections.actionFriendAllPlanFragmentToPlanDetailsFragment(it)
+                )
+            }
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

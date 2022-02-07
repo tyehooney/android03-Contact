@@ -18,11 +18,19 @@ class PlanFragment : BaseFragment<FragmentPlanBinding>(R.layout.fragment_plan) {
     private val viewModel: PlanViewModel by viewModels()
 
     private val planListAdapter: PlanListAdapter by lazy {
-        PlanListAdapter {
-            findNavController().navigate(
-                PlanFragmentDirections.actionNavigationPlanToPlanDetailsFragment(it)
-            )
-        }
+        PlanListAdapter(
+            onItemClick = {
+                findNavController().navigate(
+                    PlanFragmentDirections.actionNavigationPlanToPlanDetailsFragment(it)
+                )
+            },
+            onScrollToFirstItem = {
+                viewModel.getPlansBefore(it)
+            },
+            onScrollToLastItem = {
+                viewModel.getPlansAfter(it)
+            }
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
