@@ -18,6 +18,12 @@ interface ContactDAO {
     @Query("SELECT id, title, date, participant FROM PlanData ORDER BY date ASC")
     fun getPlanListWithFlow(): Flow<List<SimplePlanData>>
 
+    @Query("SELECT id, title, date, participant FROM PlanData  WHERE date < :firstDate  ORDER BY date DESC LIMIT :size")
+    fun getPagedPlanListBefore(firstDate: Long, size: Int): Flow<List<SimplePlanData>>
+
+    @Query("SELECT id, title, date, participant FROM PlanData  WHERE date > :lastDate  ORDER BY date ASC LIMIT :size")
+    fun getPagedPlanListAfter(lastDate: Long, size: Int): Flow<List<SimplePlanData>>
+
     @Query("SELECT id, title, date, participant FROM PlanData WHERE date > :current")
     suspend fun getPlanListAfter(current: Long): List<SimplePlanData>
 
