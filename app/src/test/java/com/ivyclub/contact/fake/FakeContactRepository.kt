@@ -195,6 +195,18 @@ class FakeContactRepository : ContactRepository {
         // TODO("Not yet implemented")
     }
 
+    override fun getPagedPlanListBefore(firstDate: Long, size: Int): Flow<List<SimplePlanData>> {
+        return flow {
+            emit(emptyList())
+        }
+    }
+
+    override fun getPagedPlanListAfter(lastDate: Long, size: Int): Flow<List<SimplePlanData>> {
+        return flow {
+            emit(emptyList())
+        }
+    }
+
     override suspend fun loadGroups(): List<GroupData> {
         return groupList
     }

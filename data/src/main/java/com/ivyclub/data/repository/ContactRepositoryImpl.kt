@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -142,6 +143,12 @@ class ContactRepositoryImpl @Inject constructor(
     override fun setPlanNotificationTime(time: Long) {
         contactPreference.setPlanNotificationTime(time)
     }
+
+    override fun getPagedPlanListBefore(firstDate: Long, size: Int): Flow<List<SimplePlanData>>
+        = contactDAO.getPagedPlanListBefore(firstDate, size).transform { emit(it.reversed()) }.flowOn(Dispatchers.IO)
+
+    override fun getPagedPlanListAfter(lastDate: Long, size: Int): Flow<List<SimplePlanData>>
+        = contactDAO.getPagedPlanListAfter(lastDate, size).flowOn(Dispatchers.IO)
 
     override suspend fun updateGroupOf(targetFriend: List<Long>, targetGroup: Long) =
         withContext(ioDispatcher) {

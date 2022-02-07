@@ -47,6 +47,8 @@ interface ContactRepository {
     fun getNotificationState(): Boolean
     fun getPlanNotificationTime(): Long
     fun setPlanNotificationTime(time: Long)
+    fun getPagedPlanListBefore(firstDate: Long, size: Int): Flow<List<SimplePlanData>>
+    fun getPagedPlanListAfter(lastDate: Long, size: Int): Flow<List<SimplePlanData>>
 
     // Group
     suspend fun loadGroups(): List<GroupData>
