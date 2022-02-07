@@ -9,18 +9,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ivyclub.contact.R
 import com.ivyclub.contact.databinding.ItemPlanListBinding
 import com.ivyclub.contact.databinding.ItemPlanListHeaderBinding
-import com.ivyclub.contact.util.DAY_IN_MILLIS
 import com.ivyclub.contact.util.StringManager.getDateFormatBy
 import com.ivyclub.contact.util.StringManager.getMonthFormatBy
 import com.ivyclub.contact.util.binding
 import com.ivyclub.contact.util.setFriendChips
-import kotlin.math.abs
 
 class PlanListAdapter(
-    val onItemClick: (Long) -> (Unit)
-) : ListAdapter<PlanListItemViewModel, PlanListAdapter.PlanViewHolder>(diffUtil) {
+    val onItemClick: (Long) -> (Unit),
+    val onScrollToFirstItem: ((Long) -> (Unit))? = null,
+    val onScrollToLastItem: ((Long) -> (Unit))? = null
+    ) : ListAdapter<PlanListItemViewModel, PlanListAdapter.PlanViewHolder>(diffUtil) {
 
-    private lateinit var scrollToRecentDateCallback: () -> (Unit)
     private lateinit var refreshVisibleListCallback: () -> (Unit)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -35,23 +34,17 @@ class PlanListAdapter(
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
 
-        scrollToRecentDateCallback = {
-            val currentDay = System.currentTimeMillis() / DAY_IN_MILLIS
-            var minGap = currentDay
-            var minIdx = 0
-            currentList.map { it.dayCount }
-                .forEachIndexed { index, day ->
-                    val gap = abs(currentDay - day)
-                    if (gap < minGap ||
-                        (gap == minGap && currentDay < day)
-                    ) {
-                        minGap = gap
-                        minIdx = index
-                    }
-                }
+        recyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
 
-            recyclerView.scrollToPosition(minIdx)
-        }
+                if (!recyclerView.canScrollVertically(-1)) {
+                    onScrollToFirstItem?.invoke(getItem(0).time)
+                } else if (!recyclerView.canScrollVertically(1)) {
+                    onScrollToLastItem?.invoke(getItem(itemCount - 1).time)
+                }
+            }
+        })
 
         refreshVisibleListCallback = {
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -66,7 +59,6 @@ class PlanListAdapter(
         currentList: MutableList<PlanListItemViewModel>
     ) {
         super.onCurrentListChanged(previousList, currentList)
-        scrollToRecentDateCallback.invoke()
         refreshVisibleListCallback.invoke()
     }
 

@@ -10,7 +10,7 @@ data class PlanListItemViewModel(
 ) {
     val id = planData.id
     private val date: Date = planData.date
-    val dayCount = date.time / DAY_IN_MILLIS
+    val time = date.time
     val planMonth = date.getExactMonth()
     val planYear = date.getExactYear()
     val planDayOfMonth = date.getDayOfMonth()
