@@ -1,14 +1,16 @@
 package com.ivyclub.contact.ui.main.plan
 
+import android.text.format.DateUtils
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivyclub.contact.ui.plan_list.PlanListItemViewModel
+import com.ivyclub.contact.util.throttleFist
 import com.ivyclub.data.ContactRepository
 import com.ivyclub.data.model.SimplePlanData
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
@@ -24,24 +26,62 @@ class PlanViewModel @Inject constructor(
 
     private val _planListItems = MutableLiveData<List<PlanListItemViewModel>>()
     val planListItems: LiveData<List<PlanListItemViewModel>> = _planListItems
+    private val planMap = hashMapOf<Long, SimplePlanData>()
+    private val pageSize = 20
 
     private var planListSnapshot = emptyList<SimplePlanData>()
 
     init { getMyPlans() }
 
     private fun getMyPlans() {
-        viewModelScope.launch {
-            _loading.value = true
+        _loading.value = true
 
-            repository.loadPlanListWithFlow().buffer()
-                .transform { planList ->
-                    planListSnapshot = planList
-                    emit(planList.mapToPlanItemList(setFriendMap()))
-                }.collect { planItemViewModels ->
-                    _planListItems.value = planItemViewModels
-                    _loading.value = false
+        val current = System.currentTimeMillis()
+        getPlansBefore(current)
+        getPlansAfter(current)
+    }
+
+    fun getPlansAfter(time: Long) {
+        viewModelScope.launch {
+            repository.getPagedPlanListAfter(time, pageSize)
+                .throttleFist(DateUtils.SECOND_IN_MILLIS)
+                .transform { newPlanList ->
+                    if (newPlanList.isNotEmpty()) {
+                        updatePlans(newPlanList)
+                        emit(planListSnapshot.mapToPlanItemList(setFriendMap()))
+                    } else {
+                        cancel()
+                    }
+                }.collect { planListItemViewModels ->
+                    _planListItems.postValue(planListItemViewModels)
+                    _loading.postValue(false)
                 }
         }
+    }
+
+    fun getPlansBefore(time: Long) {
+        viewModelScope.launch {
+            repository.getPagedPlanListBefore(time, pageSize)
+                .throttleFist(DateUtils.SECOND_IN_MILLIS)
+                .transform { newPlanList ->
+                    if (newPlanList.isNotEmpty()) {
+                        updatePlans(newPlanList)
+                        emit(planListSnapshot.mapToPlanItemList(setFriendMap()))
+                    } else {
+                        cancel()
+                    }
+                }.collect { planListItemViewModels ->
+                    _planListItems.postValue(planListItemViewModels)
+                    _loading.postValue(false)
+                }
+        }
+    }
+
+    private fun updatePlans(newPlans: List<SimplePlanData>) {
+        newPlans.forEach { newPlan ->
+            planMap[newPlan.id] = newPlan
+        }
+        planListSnapshot = planMap.values.toList().sortedBy { it.date.time }
     }
 
     fun refreshPlanItems() {
