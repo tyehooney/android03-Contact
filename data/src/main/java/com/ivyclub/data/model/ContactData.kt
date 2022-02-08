@@ -1,6 +1,7 @@
 package com.ivyclub.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.sql.Date
 
@@ -17,7 +18,7 @@ data class FriendData(
     val id: Long = 0
 )
 
-@Entity(tableName = "PlanData")
+@Entity(tableName = "PlanData", indices = [Index(value = ["date"])])
 data class PlanData(
     val participant: List<Long>, // 만나는 사람들(id)
     val date: Date, // datetime

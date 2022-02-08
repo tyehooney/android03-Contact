@@ -77,14 +77,14 @@
                 android:layout_centerHorizontal="true"/>
         </RelativeLayout>
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="@{viewModel.loading ? View.VISIBLE : View.GONE}"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+<!--        <ProgressBar-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:visibility="@{viewModel.loading ? View.VISIBLE : View.GONE}"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"/>-->
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_plan_list"
@@ -94,5 +94,23 @@
             app:layout_constraintTop_toBottomOf="@+id/cl_toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:listitem="@layout/item_plan_list"/>
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{viewModel.topLoading ? View.VISIBLE : View.GONE}"
+            android:indeterminateTint="@color/green_200"
+            app:layout_constraintTop_toTopOf="@id/rv_plan_list"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{viewModel.bottomLoading ? View.VISIBLE : View.GONE}"
+            android:indeterminateTint="@color/green_200"
+            app:layout_constraintBottom_toBottomOf="@id/rv_plan_list"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

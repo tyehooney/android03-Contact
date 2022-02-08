@@ -49,8 +49,8 @@ class PlanListAdapter(
         refreshVisibleListCallback = {
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
             val firstPosition = layoutManager.findFirstVisibleItemPosition() - 1
-            val itemCount = layoutManager.findLastVisibleItemPosition() - firstPosition
-            notifyItemRangeChanged(maxOf(firstPosition, 0), itemCount + 2)
+            val visibleItemCount = layoutManager.findLastVisibleItemPosition() - firstPosition
+            notifyItemRangeChanged(maxOf(firstPosition, 0), minOf(itemCount, visibleItemCount + 2))
         }
     }
 
@@ -64,7 +64,7 @@ class PlanListAdapter(
 
     fun isHeader(position: Int): Boolean {
         if (position == 0)
-            return true
+            return false
 
         val currentItem = getItem(position)
         val lastItem = getItem(position - 1)

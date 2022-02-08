@@ -23,6 +23,10 @@ class PlanViewModel @Inject constructor(
 
     private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> = _loading
+    private val _topLoading = MutableLiveData<Boolean>()
+    val topLoading: LiveData<Boolean> = _topLoading
+    private val _bottomLoading = MutableLiveData<Boolean>()
+    val bottomLoading: LiveData<Boolean> = _bottomLoading
 
     private val _planListItems = MutableLiveData<List<PlanListItemViewModel>>()
     val planListItems: LiveData<List<PlanListItemViewModel>> = _planListItems
@@ -43,6 +47,10 @@ class PlanViewModel @Inject constructor(
 
     fun getPlansAfter(time: Long) {
         viewModelScope.launch {
+            loading.value?.let {
+                if (!it) { _bottomLoading.value = true }
+            }
+
             repository.getPagedPlanListAfter(time, pageSize)
                 .throttleFist(DateUtils.SECOND_IN_MILLIS)
                 .transform { newPlanList ->
@@ -50,10 +58,12 @@ class PlanViewModel @Inject constructor(
                         updatePlans(newPlanList)
                         emit(planListSnapshot.mapToPlanItemList(setFriendMap()))
                     } else {
+                        _bottomLoading.postValue(false)
                         cancel()
                     }
                 }.collect { planListItemViewModels ->
                     _planListItems.postValue(planListItemViewModels)
+                    _bottomLoading.postValue(false)
                     _loading.postValue(false)
                 }
         }
@@ -61,6 +71,10 @@ class PlanViewModel @Inject constructor(
 
     fun getPlansBefore(time: Long) {
         viewModelScope.launch {
+            loading.value?.let {
+                if (!it) { _topLoading.value = true }
+            }
+
             repository.getPagedPlanListBefore(time, pageSize)
                 .throttleFist(DateUtils.SECOND_IN_MILLIS)
                 .transform { newPlanList ->
@@ -68,10 +82,12 @@ class PlanViewModel @Inject constructor(
                         updatePlans(newPlanList)
                         emit(planListSnapshot.mapToPlanItemList(setFriendMap()))
                     } else {
+                        _topLoading.postValue(false)
                         cancel()
                     }
                 }.collect { planListItemViewModels ->
                     _planListItems.postValue(planListItemViewModels)
+                    _topLoading.postValue(false)
                     _loading.postValue(false)
                 }
         }
