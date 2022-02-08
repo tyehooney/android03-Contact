@@ -2,6 +2,7 @@ package com.ivyclub.contact.util
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.util.Log
 import com.ivyclub.data.ContactRepository
 import com.ivyclub.data.model.PlanData
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,7 +11,6 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.math.BigDecimal
 import java.sql.Date
 import javax.inject.Inject
 
@@ -28,7 +28,7 @@ class TestPlanDataManager @Inject constructor(
             var line: String? = reader.readLine()
             while (line != null) {
                 line.split(",").also {
-                    val date = Date(BigDecimal(it[1]).longValueExact())
+                    val date = Date(it[1].toLong() * 1000)
                     repository.savePlanData(
                         PlanData(
                             participant = emptyList(),
@@ -43,6 +43,7 @@ class TestPlanDataManager @Inject constructor(
                 }
                 line = reader.readLine()
             }
+            Log.i(this@TestPlanDataManager.javaClass.simpleName, "finished inserting test data")
         } catch (e: IOException) {
             e.printStackTrace()
         }
